@@ -19,17 +19,27 @@ export class AppComponent implements OnInit{
         this.message=false;
       }, 1000);
     });
+
+    socket.fromEvent('new_message_user').subscribe((msj: any) => {
+      console.log('llego un mensaje ', msj)
+      this.messages$.next([...this.messages$.getValue() , msj])
+    });
   }
 
   title = 'Angular';
   message = false;
 
+  messages$ = new BehaviorSubject<any[]>([]);
+
   private _room$ = new BehaviorSubject<string | null>('UNO');
+
+  myMessage: string= '';
 
 
   ngOnInit(): void {
     this.socket.emit('event_message', '🎈 Dato enviado desde el front');
     this.joinRoom();
+    this.sendMessageInput();
   }
 
   sendMessage(msg: string) {
@@ -46,6 +56,12 @@ export class AppComponent implements OnInit{
 
   joinRoom(){
     this.socket.emit('event_join', this._room$.getValue() );
+  }
+
+  sendMessageInput(){
+    console.log(this.myMessage);
+    this.socket.emit('newMessage', this.myMessage );
+    this.myMessage='';
   }
 
 
